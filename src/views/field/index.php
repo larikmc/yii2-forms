@@ -1,0 +1,1 @@
+<?php use yii\grid\GridView; use yii\helpers\Html; ?><div class="sz-panel"><p><?= Html::a("Создать поле",["create"],["class"=>"btn btn-success"]) ?></p><?= GridView::widget(["dataProvider"=>$dataProvider,"columns"=>["id","name","slug","type","mask",["attribute"=>"is_active","format"=>"boolean"],["class"=>yii\grid\ActionColumn::class]]]) ?></div>
