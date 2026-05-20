@@ -27,17 +27,26 @@ class FormController extends AdminController
     public function actionSaveFields(int $id){
         $model = $this->findModel($id);
         $rows = \Yii::$app->request->post('FormField', []);
+        $hasErrors = false;
+
         foreach ($rows as $formFieldId => $attributes) {
             $formField = FormField::findOne(['id' => (int) $formFieldId, 'form_id' => $model->id]);
             if (!$formField) {
                 continue;
             }
 
-            $formField->load(['FormField' => $attributes], '');
-            $formField->save();
+            $formField->setAttributes($attributes);
+            if (!$formField->save()) {
+                $hasErrors = true;
+            }
         }
 
-        \Yii::$app->session->setFlash('success', 'Поля формы сохранены');
+        if ($hasErrors) {
+            \Yii::$app->session->setFlash('error', 'Не удалось сохранить часть полей формы. Проверьте введённые значения.');
+        } else {
+            \Yii::$app->session->setFlash('success', 'Поля формы сохранены');
+        }
+
         return $this->redirect(['fields', 'id' => $id]);
     }
     public function actionUpdateField(int $id, int $formFieldId){
