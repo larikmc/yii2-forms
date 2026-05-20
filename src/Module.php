@@ -2,6 +2,8 @@
 
 namespace larikmc\forms;
 
+use larikmc\forms\helpers\SchemaInstaller;
+use larikmc\forms\models\Setting;
 use yii\base\Module as BaseModule;
 
 class Module extends BaseModule
@@ -19,11 +21,17 @@ class Module extends BaseModule
     {
         parent::init();
         $this->controllerNamespace = 'larikmc\\forms\\controllers';
+        SchemaInstaller::ensureOptionalSchema();
     }
 
     public function getNotificationEmails(): array
     {
-        return $this->normalizeEmails($this->notificationEmails);
+        $stored = null;
+        if (Setting::hasSettingsTable()) {
+            $stored = Setting::getValue(Setting::KEY_NOTIFICATION_EMAILS);
+        }
+
+        return $this->normalizeEmails($stored ?: $this->notificationEmails);
     }
 
     public function normalizeEmails(array|string|null $emails): array

@@ -65,7 +65,7 @@ class Form extends ActiveRecord
 
     public function attributeLabels(): array
     {
-        return ['name'=>'Служебное название','slug'=>'Слаг','title'=>'Заголовок формы','description'=>'Описание','submit_label'=>'Текст кнопки','success_message'=>'Сообщение после отправки','notification_emails'=>'E-mail для уведомлений','is_active'=>'Активна','store_submissions'=>'Сохранять заявки'];
+        return ['name'=>'Служебное название','slug'=>'Слаг','title'=>'Заголовок формы','description'=>'Описание','submit_label'=>'Текст кнопки','success_message'=>'Сообщение после отправки','notification_emails'=>'Отправлять на e-mail','is_active'=>'Активна','store_submissions'=>'Сохранять заявки'];
     }
 
     public function getNotificationEmailsList(): array

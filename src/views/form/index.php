@@ -10,7 +10,18 @@ use yii\helpers\Html;
         'columns' => [
             ['attribute' => 'title', 'label' => 'Форма', 'value' => static fn($model) => $model->title ?: $model->name],
             'slug',
-            ['attribute' => 'is_active', 'format' => 'boolean'],
+            [
+                'attribute' => 'is_active',
+                'format' => 'raw',
+                'label' => 'Активна',
+                'value' => static function ($model) {
+                    if ((bool) $model->is_active) {
+                        return Html::tag('span', 'Активна', ['class' => 'badge text-bg-success']);
+                    }
+
+                    return Html::tag('span', 'Выключена', ['class' => 'badge text-bg-secondary']);
+                },
+            ],
             [
                 'class' => ActionColumn::class,
                 'template' => '{update} {fields} {code} {subs} {delete}',

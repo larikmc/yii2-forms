@@ -62,6 +62,64 @@ Example:
 ],
 ```
 
+## Mailer Requirement
+
+To send e-mail notifications, the host project must have a configured Yii `mailer` component.
+
+The extension itself stores recipients and calls:
+
+```php
+Yii::$app->mailer
+```
+
+This means:
+
+- extension setting `notificationEmails` defines **where** notifications are sent
+- project component `mailer` defines **how** notifications are sent
+
+If `mailer` is not configured:
+
+- form submissions are still saved normally
+- success message is still shown to user
+- e-mail notifications are simply skipped
+
+Typical project-level mailer options:
+
+- SMTP
+- sendmail
+- file transport for development
+
+Example development config:
+
+```php
+'components' => [
+    'mailer' => [
+        'class' => \yii\symfonymailer\Mailer::class,
+        'useFileTransport' => true,
+    ],
+],
+```
+
+Example real SMTP config:
+
+```php
+'components' => [
+    'mailer' => [
+        'class' => \yii\symfonymailer\Mailer::class,
+        'transport' => [
+            'scheme' => 'smtp',
+            'host' => 'smtp.example.com',
+            'username' => 'user@example.com',
+            'password' => 'secret',
+            'port' => 587,
+            'encryption' => 'tls',
+        ],
+    ],
+],
+```
+
+The exact mailer transport depends on the host project.
+
 ## Migrations
 
 ```bash
@@ -74,6 +132,13 @@ The extension creates tables:
 - `forms_field`
 - `forms_form_field`
 - `forms_submission`
+
+Additional optional service schema may also be created:
+
+- `forms_setting`
+- column `forms_form.notification_emails`
+
+For user convenience, the module can create these optional service structures automatically when opening the settings section or working with per-form notification e-mails.
 
 ## Admin Menu Integration
 
@@ -95,6 +160,10 @@ Example menu config for `larikmc/yii2-admin`:
         [
             'label' => 'Заявки',
             'url' => ['/forms/submission/index'],
+        ],
+        [
+            'label' => 'Настройки',
+            'url' => ['/forms/settings/index'],
         ],
     ],
 ],
@@ -183,13 +252,15 @@ Minimal scenario:
 
 1. Create fields in `/forms/field/index`
 2. Create a form in `/forms/form/index`
-3. Open form editing
-4. Go to tab `Поля`
-5. Add fields to form
-6. Open tab `Код вставки`
-7. Copy widget code
-8. Insert widget into frontend view
-9. Receive submissions in `/forms/submission/index`
+3. Open `/forms/settings/index` and set default e-mail recipients if needed
+4. Open form editing
+5. Go to tab `Поля`
+6. Add fields to form
+7. Optionally set per-form notification e-mails in `Основное`
+8. Open tab `Код вставки`
+9. Copy widget code
+10. Insert widget into frontend view
+11. Receive submissions in `/forms/submission/index`
 
 ## Inline Form
 
@@ -425,11 +496,18 @@ You can pass:
 Per-form override:
 
 - open form editing in admin
-- fill field `E-mail для уведомлений`
+- fill field `Отправлять на e-mail`
 - if this field is filled, the form will use its own addresses
 - if this field is empty, the form will use module-level addresses
 
+Admin settings page:
+
+- open `/forms/settings/index`
+- fill `E-mail по умолчанию для всех форм`
+- use one or several addresses separated by comma
+
 If no notification e-mails are configured, the form is still submitted and stored normally.
+If notification e-mails are configured but Yii `mailer` is missing, the form is still submitted and stored normally, but no e-mails are sent.
 
 ## Consent Checkbox
 
@@ -469,6 +547,9 @@ The extension includes:
 - popup frontend is implemented inside the extension and does not depend on Bootstrap modal JS
 - frontend form rendering uses extension CSS and JS instead of Yii ActiveForm assets
 - phone mask and validation are implemented in extension JavaScript
+- frontend submit button has loading state and prevents double submit
+- frontend form includes required personal data consent checkbox
+- submissions are primarily viewed from popup in admin list
 - default field label is always field name
 - form title is the main user-facing form name
 - submissions are always stored

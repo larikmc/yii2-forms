@@ -23,6 +23,7 @@ use yii\helpers\ArrayHelper;
 
 <div class="sz-panel">
     <h5>Поля формы</h5>
+    <?php $bulkForm = ActiveForm::begin(['action' => ['save-fields', 'id' => $model->id], 'options' => ['class' => 'm-0']]); ?>
     <table class="table table-striped table-bordered">
         <thead>
         <tr>
@@ -31,22 +32,21 @@ use yii\helpers\ArrayHelper;
         </thead>
         <tbody>
         <?php foreach ($dataProvider->getModels() as $formField): ?>
-            <?php $rowForm = ActiveForm::begin(['action' => ['update-field', 'id' => $model->id, 'formFieldId' => $formField->id], 'options' => ['class' => 'm-0']]); ?>
             <tr>
                 <td><?= Html::encode($formField->field?->name) ?></td>
                 <td><?= Html::encode($formField->field?->type) ?></td>
-                <td><?= $rowForm->field($formField, 'sort_order')->input('number')->label(false) ?></td>
-                <td><?= $rowForm->field($formField, 'is_required')->checkbox(['label' => false]) ?></td>
-                <td><?= $rowForm->field($formField, 'placeholder_override')->textInput()->label(false) ?></td>
-                <td><?= $rowForm->field($formField, 'hint_override')->textInput()->label(false) ?></td>
-                <td><?= $rowForm->field($formField, 'is_active')->checkbox(['label' => false])->hint(false) ?></td>
+                <td><?= Html::activeInput('number', $formField, "[{$formField->id}]sort_order", ['class' => 'form-control']) ?></td>
+                <td><?= Html::activeCheckbox($formField, "[{$formField->id}]is_required", ['label' => false, 'class' => 'form-check-input']) ?></td>
+                <td><?= Html::activeTextInput($formField, "[{$formField->id}]placeholder_override", ['class' => 'form-control']) ?></td>
+                <td><?= Html::activeTextInput($formField, "[{$formField->id}]hint_override", ['class' => 'form-control']) ?></td>
+                <td><?= Html::activeCheckbox($formField, "[{$formField->id}]is_active", ['label' => false, 'class' => 'form-check-input']) ?></td>
                 <td>
-                    <?= Html::submitButton('Сохранить', ['class' => 'btn btn-sm btn-success']) ?>
                     <?= Html::a('Удалить', ['delete-field', 'id' => $model->id, 'formFieldId' => $formField->id], ['class' => 'btn btn-sm btn-outline-danger', 'data-method' => 'post', 'data-confirm' => 'Удалить поле из формы?']) ?>
                 </td>
             </tr>
-            <?php ActiveForm::end(); ?>
         <?php endforeach; ?>
         </tbody>
     </table>
+    <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
+    <?php ActiveForm::end(); ?>
 </div>

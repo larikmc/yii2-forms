@@ -24,6 +24,22 @@ class FormController extends AdminController
         $dataProvider = new ActiveDataProvider(['query' => FormField::find()->where(['form_id' => $model->id])->with('field')->orderBy(['sort_order' => SORT_ASC, 'id' => SORT_ASC]), 'pagination' => false]);
         return $this->render('fields', compact('model', 'linkModel', 'availableFields', 'dataProvider'));
     }
+    public function actionSaveFields(int $id){
+        $model = $this->findModel($id);
+        $rows = \Yii::$app->request->post('FormField', []);
+        foreach ($rows as $formFieldId => $attributes) {
+            $formField = FormField::findOne(['id' => (int) $formFieldId, 'form_id' => $model->id]);
+            if (!$formField) {
+                continue;
+            }
+
+            $formField->load(['FormField' => $attributes], '');
+            $formField->save();
+        }
+
+        \Yii::$app->session->setFlash('success', 'Поля формы сохранены');
+        return $this->redirect(['fields', 'id' => $id]);
+    }
     public function actionUpdateField(int $id, int $formFieldId){
         $model = $this->findModel($id);
         $formField = FormField::findOne(['id' => $formFieldId, 'form_id' => $model->id]);
