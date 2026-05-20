@@ -31,6 +31,7 @@ if ($module instanceof \larikmc\forms\Module) {
     'class' => 'forms-widget__form',
     'novalidate' => true,
 ], $widget->formOptions)) ?>
+<?= Html::hiddenInput('_form_id', (int) $form->id) ?>
 <?= Html::hiddenInput('_form_slug', $form->slug) ?>
 <div class="forms-widget-hp"><?= Html::textInput('forms_hp', '', ['autocomplete' => 'off', 'tabindex' => -1]) ?></div>
 <?php foreach ($formFields as $formField): ?><?= FieldRenderHelper::render($model, $formField) ?><?php endforeach; ?>

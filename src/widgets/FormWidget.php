@@ -10,7 +10,8 @@ use yii\base\Widget;
 
 class FormWidget extends Widget
 {
-    public string $slug;
+    public string $slug = '';
+    public ?int $formId = null;
     public ?string $template = null;
     public ?string $view = null;
     public array $options = [];
@@ -24,9 +25,16 @@ class FormWidget extends Widget
         $module = \Yii::$app->getModule('forms');
         if (!$module instanceof Module) { return ''; }
 
-        $form = Form::find()->where(['slug'=>$this->slug, 'is_active'=>1])->one();
+        $query = Form::find()->where(['is_active' => 1]);
+        if ($this->formId !== null) {
+            $query->andWhere(['id' => $this->formId]);
+        } else {
+            $query->andWhere(['slug' => $this->slug]);
+        }
+        $form = $query->one();
         if (!$form) {
-            return YII_DEBUG ? "<!-- Form \"{$this->slug}\" not found or inactive -->" : '';
+            $idOrSlug = $this->formId !== null ? ('id=' . $this->formId) : ('slug=' . $this->slug);
+            return YII_DEBUG ? "<!-- Form ({$idOrSlug}) not found or inactive -->" : '';
         }
 
         FormsAsset::register($this->getView());
