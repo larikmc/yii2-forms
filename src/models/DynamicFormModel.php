@@ -17,7 +17,7 @@ class DynamicFormModel extends DynamicModel
         foreach ($formFields as $formField) {
             $slug = $formField->field->slug;
             $attributes[$slug] = null;
-            $this->labels[$slug] = $formField->getEffectiveLabel() ?: $formField->field->name;
+            $this->labels[$slug] = $formField->label_override ?: $formField->field->name;
             $this->hints[$slug] = $formField->getEffectiveHint() ?: '';
         }
         parent::__construct($attributes, $config);
@@ -43,6 +43,16 @@ class DynamicFormModel extends DynamicModel
 
     public function attributeLabels(): array { return $this->labels; }
     public function attributeHints(): array { return $this->hints; }
-    public function getSubmissionData(): array { return $this->getAttributes(); }
+
+    public function getSubmissionData(): array
+    {
+        $data = [];
+        foreach ($this->getAttributes() as $attribute => $value) {
+            $label = $this->labels[$attribute] ?? $attribute;
+            $data[$label] = $value;
+        }
+        return $data;
+    }
+
     public function getDynamicAttributes(): array { return array_keys($this->getAttributes()); }
 }

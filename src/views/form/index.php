@@ -1,3 +1,60 @@
 <?php
-use yii\grid\GridView; use yii\helpers\Html; ?>
-<div class="sz-panel"><p><?= Html::a('Создать форму',['create'],['class'=>'btn btn-success']) ?></p><?= GridView::widget(['dataProvider'=>$dataProvider,'columns'=>['id','name','slug',['attribute'=>'is_active','format'=>'boolean'],['class'=>yii\grid\ActionColumn::class,'template'=>'{update} {delete} {fields} {code} {subs}','buttons'=>['fields'=>fn($u,$m)=>Html::a('Поля',['fields','id'=>$m->id]),'code'=>fn($u,$m)=>Html::a('Код',['code','id'=>$m->id]),'subs'=>fn($u,$m)=>Html::a('Заявки',['submissions','id'=>$m->id])]]]]) ?></div>
+use yii\grid\ActionColumn;
+use yii\grid\GridView;
+use yii\helpers\Html;
+?>
+<div class="sz-panel">
+    <p><?= Html::a('Создать форму', ['create'], ['class' => 'btn btn-success']) ?></p>
+    <?= GridView::widget([
+        'dataProvider' => $dataProvider,
+        'columns' => [
+            ['attribute' => 'title', 'label' => 'Форма', 'value' => static fn($model) => $model->title ?: $model->name],
+            'slug',
+            ['attribute' => 'is_active', 'format' => 'boolean'],
+            [
+                'class' => ActionColumn::class,
+                'template' => '{update} {fields} {code} {subs} {delete}',
+                'contentOptions' => ['class' => 'action-column'],
+                'buttons' => [
+                    'update' => static function ($url) {
+                        return Html::a('<span class="material-symbols-rounded">edit</span>', $url, [
+                            'class' => 'sz-row-action',
+                            'aria-label' => 'Редактировать',
+                            'title' => 'Редактировать',
+                        ]);
+                    },
+                    'fields' => static function ($url, $model) {
+                        return Html::a('<span class="material-symbols-rounded">view_list</span>', ['fields', 'id' => $model->id], [
+                            'class' => 'sz-row-action',
+                            'aria-label' => 'Поля',
+                            'title' => 'Поля',
+                        ]);
+                    },
+                    'code' => static function ($url, $model) {
+                        return Html::a('<span class="material-symbols-rounded">code</span>', ['code', 'id' => $model->id], [
+                            'class' => 'sz-row-action',
+                            'aria-label' => 'Код вставки',
+                            'title' => 'Код вставки',
+                        ]);
+                    },
+                    'subs' => static function ($url, $model) {
+                        return Html::a('<span class="material-symbols-rounded">mail</span>', ['submissions', 'id' => $model->id], [
+                            'class' => 'sz-row-action',
+                            'aria-label' => 'Заявки',
+                            'title' => 'Заявки',
+                        ]);
+                    },
+                    'delete' => static function ($url) {
+                        return Html::a('<span class="material-symbols-rounded">delete</span>', $url, [
+                            'class' => 'sz-row-action',
+                            'aria-label' => 'Удалить',
+                            'title' => 'Удалить',
+                            'data-method' => 'post',
+                            'data-confirm' => 'Удалить эту форму?',
+                        ]);
+                    },
+                ],
+            ],
+        ],
+    ]) ?>
+</div>

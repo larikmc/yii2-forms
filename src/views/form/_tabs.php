@@ -1,1 +1,19 @@
-<ul class="nav nav-tabs mb-3"><li class="nav-item"><a class="nav-link active" href="#">Основное</a></li></ul>
+<?php
+use yii\helpers\Html;
+/** @var \larikmc\forms\models\Form $model */
+$items = [
+    'main' => ['label' => 'Основное', 'url' => ['update', 'id' => $model->id]],
+    'fields' => ['label' => 'Поля', 'url' => ['fields', 'id' => $model->id]],
+    'code' => ['label' => 'Код вставки', 'url' => ['code', 'id' => $model->id]],
+    'submissions' => ['label' => 'Заявки', 'url' => ['submissions', 'id' => $model->id]],
+];
+?>
+<div class="sz-page mb-3">
+    <ul class="nav nav-tabs">
+    <?php foreach ($items as $key => $item): ?>
+        <li class="nav-item">
+            <?= Html::a($item['label'], $item['url'], ['class' => 'nav-link' . (($active ?? '') === $key ? ' active' : '')]) ?>
+        </li>
+    <?php endforeach; ?>
+    </ul>
+</div>

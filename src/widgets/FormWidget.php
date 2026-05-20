@@ -16,6 +16,8 @@ class FormWidget extends Widget
     public array $options = [];
     public array $formOptions = [];
     public bool $ajax = false;
+    public bool $showHeading = true;
+    public bool $showDescription = true;
 
     public function run(): string
     {
@@ -27,7 +29,7 @@ class FormWidget extends Widget
             return YII_DEBUG ? "<!-- Form \"{$this->slug}\" not found or inactive -->" : '';
         }
 
-        FormsAsset::register($this->view);
+        FormsAsset::register($this->getView());
         $uid = $this->getId() . '-' . $form->slug . '-' . substr(md5(uniqid('', true)), 0, 8);
         $formFields = $form->getFormFields()->andWhere(['is_active'=>1])->with('field')->all();
         $model = new DynamicFormModel($formFields);

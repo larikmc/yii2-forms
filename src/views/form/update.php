@@ -1,1 +1,2 @@
-<?= \->render('_tabs',['model'=>\,'active'=>'main']) ?><?= \->render('_form',['model'=>\]) ?>
+<?= $this->render('_tabs', ['model' => $model, 'active' => 'main']) ?>
+<?= $this->render('_form', ['model' => $model]) ?>

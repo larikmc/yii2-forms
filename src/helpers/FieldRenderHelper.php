@@ -16,7 +16,7 @@ class FieldRenderHelper
         $slug = $field->slug;
         $placeholder = $formField->getEffectivePlaceholder();
         $hint = $formField->getEffectiveHint();
-        $label = $formField->getEffectiveLabel();
+        $label = $formField->label_override ?: $field->name;
 
         if ($field->type === Field::TYPE_HIDDEN) { return Html::activeHiddenInput($model, $slug); }
 
