@@ -23,6 +23,9 @@ class SchemaInstaller
             }
 
             self::ensureNotificationEmailsColumn($db, $formsFormTable);
+            self::ensureButtonClassColumn($db, $formsFormTable);
+            self::ensureSubmitButtonClassColumn($db, $formsFormTable);
+            self::ensureTriggerButtonClassColumn($db, $formsFormTable);
             self::ensureSettingsTable($db, $formsSettingTable);
         } catch (\Throwable $e) {
             \Yii::warning($e->getMessage(), 'forms.schema');
@@ -54,6 +57,39 @@ class SchemaInstaller
 
         $db->createCommand()->createIndex('idx-forms_setting-key', $formsSettingTable, 'key', true)->execute();
         $db->schema->refreshTableSchema($formsSettingTable);
+    }
+
+    private static function ensureButtonClassColumn(Connection $db, string $formsFormTable): void
+    {
+        $schema = $db->getTableSchema($formsFormTable, true);
+        if ($schema === null || $schema->getColumn('button_class') !== null) {
+            return;
+        }
+
+        $db->createCommand()->addColumn($formsFormTable, 'button_class', $db->schema->createColumnSchemaBuilder('string', 255))->execute();
+        $db->schema->refreshTableSchema($formsFormTable);
+    }
+
+    private static function ensureSubmitButtonClassColumn(Connection $db, string $formsFormTable): void
+    {
+        $schema = $db->getTableSchema($formsFormTable, true);
+        if ($schema === null || $schema->getColumn('submit_button_class') !== null) {
+            return;
+        }
+
+        $db->createCommand()->addColumn($formsFormTable, 'submit_button_class', $db->schema->createColumnSchemaBuilder('string', 255))->execute();
+        $db->schema->refreshTableSchema($formsFormTable);
+    }
+
+    private static function ensureTriggerButtonClassColumn(Connection $db, string $formsFormTable): void
+    {
+        $schema = $db->getTableSchema($formsFormTable, true);
+        if ($schema === null || $schema->getColumn('trigger_button_class') !== null) {
+            return;
+        }
+
+        $db->createCommand()->addColumn($formsFormTable, 'trigger_button_class', $db->schema->createColumnSchemaBuilder('string', 255))->execute();
+        $db->schema->refreshTableSchema($formsFormTable);
     }
 
     private static function realTableName(Connection $db, string $name): string

@@ -217,7 +217,7 @@
   };
 
   const initForm = (form) => {
-    const submitButton = form.querySelector('.forms-widget__submit');
+    const submitButton = form.querySelector('button[type="submit"], input[type="submit"]');
 
     form.querySelectorAll('input[data-forms-type="phone"]').forEach(initPhoneMask);
 
@@ -251,6 +251,7 @@
         submitButton.classList.add('is-loading');
         submitButton.disabled = true;
         submitButton.setAttribute('aria-busy', 'true');
+        submitButton.setAttribute('data-forms-submit', '1');
       }
     });
   };
@@ -272,7 +273,7 @@
   }
 
   window.addEventListener('pageshow', () => {
-    document.querySelectorAll('.forms-widget__submit.is-loading').forEach((button) => {
+    document.querySelectorAll('.is-loading[data-forms-submit]').forEach((button) => {
       button.classList.remove('is-loading');
       button.disabled = false;
       button.removeAttribute('aria-busy');

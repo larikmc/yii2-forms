@@ -21,6 +21,8 @@ The extension is designed for projects that use `larikmc/yii2-admin` and need:
 - own frontend form CSS and JavaScript
 - client-side validation without `jquery` and `yii.activeForm`
 - email notifications with module-level and per-form recipients
+- configurable default CSS classes for popup trigger and submit button
+- editable consent text (HTML) from admin settings
 - support for multiple forms and multiple popups on one page
 - file-based PHP templates
 - safe submission storage in JSON
@@ -505,6 +507,10 @@ Admin settings page:
 - open `/forms/settings/index`
 - fill `E-mail по умолчанию для всех форм`
 - use one or several addresses separated by comma
+- optionally set:
+  - default popup trigger button class
+  - default submit button class
+  - consent text HTML
 
 If no notification e-mails are configured, the form is still submitted and stored normally.
 If notification e-mails are configured but Yii `mailer` is missing, the form is still submitted and stored normally, but no e-mails are sent.
@@ -522,6 +528,19 @@ The default text is:
 ```text
 Даю согласие на обработку персональных данных для обработки моего обращения и обратной связи со мной. Ознакомлен(а) с Политикой обработки персональных данных.
 ```
+
+You can override this text in admin settings (`/forms/settings/index`) using HTML.
+
+## Data Normalization
+
+When saving forms and fields in admin, the extension normalizes values:
+
+- trims extra spaces at start/end
+- converts empty strings to `null` for optional text fields
+- makes first letter uppercase for user-facing titles:
+  - field name
+  - form title
+  - submit button label
 
 Statuses:
 

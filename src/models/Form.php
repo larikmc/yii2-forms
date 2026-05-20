@@ -18,8 +18,8 @@ class Form extends ActiveRecord
             [['title', 'submit_label'], 'required'],
             [['description', 'success_message'], 'string'],
             [['is_active', 'store_submissions'], 'boolean'],
-            [['name', 'slug', 'title', 'submit_label'], 'string', 'max' => 255],
-            [['name', 'slug', 'title', 'description', 'submit_label', 'success_message'], 'filter', 'filter' => 'trim'],
+            [['name', 'slug', 'title', 'submit_label', 'button_class', 'submit_button_class', 'trigger_button_class'], 'string', 'max' => 255],
+            [['name', 'slug', 'title', 'description', 'submit_label', 'success_message', 'button_class', 'submit_button_class', 'trigger_button_class'], 'filter', 'filter' => 'trim'],
             [['slug'], 'filter', 'filter' => static fn($value) => is_string($value) ? trim(mb_strtolower($value)) : $value],
             [['slug'], 'default', 'value' => null],
             [['slug'], 'match', 'pattern' => '/^[a-zA-Z0-9_-]+$/'],
@@ -33,6 +33,22 @@ class Form extends ActiveRecord
             $rules[] = [['notification_emails'], 'validateNotificationEmails'];
         }
 
+        if (!self::hasButtonClassColumn()) {
+            $rules = array_values(array_filter($rules, static function (array $rule): bool {
+                return !in_array('button_class', (array) ($rule[0] ?? []), true);
+            }));
+        }
+        if (!self::hasSubmitButtonClassColumn()) {
+            $rules = array_values(array_filter($rules, static function (array $rule): bool {
+                return !in_array('submit_button_class', (array) ($rule[0] ?? []), true);
+            }));
+        }
+        if (!self::hasTriggerButtonClassColumn()) {
+            $rules = array_values(array_filter($rules, static function (array $rule): bool {
+                return !in_array('trigger_button_class', (array) ($rule[0] ?? []), true);
+            }));
+        }
+
         return $rules;
     }
 
@@ -41,6 +57,14 @@ class Form extends ActiveRecord
         if (!parent::beforeValidate()) {
             return false;
         }
+
+        $this->title = $this->normalizeTitleCase($this->title);
+        $this->description = $this->normalizeTrimmed($this->description);
+        $this->submit_label = $this->normalizeTitleCase($this->submit_label);
+        $this->success_message = $this->normalizeTrimmed($this->success_message);
+        $this->notification_emails = $this->normalizeTrimmed($this->notification_emails);
+        $this->submit_button_class = $this->normalizeTrimmed($this->submit_button_class);
+        $this->trigger_button_class = $this->normalizeTrimmed($this->trigger_button_class);
 
         if ($this->title) {
             $this->name = $this->title;
@@ -63,9 +87,50 @@ class Form extends ActiveRecord
         return true;
     }
 
+    private function normalizeTrimmed(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim($value);
+        return $value === '' ? null : $value;
+    }
+
+    private function normalizeTitleCase(?string $value): ?string
+    {
+        $value = $this->normalizeTrimmed($value);
+        if ($value === null) {
+            return null;
+        }
+
+        $first = mb_substr($value, 0, 1);
+        $rest = mb_substr($value, 1);
+
+        return mb_strtoupper($first) . $rest;
+    }
+
     public function attributeLabels(): array
     {
-        return ['name'=>'Служебное название','slug'=>'Слаг','title'=>'Заголовок формы','description'=>'Описание','submit_label'=>'Текст кнопки','success_message'=>'Сообщение после отправки','notification_emails'=>'Отправлять на e-mail','is_active'=>'Активна','store_submissions'=>'Сохранять заявки'];
+        return ['name'=>'Служебное название','slug'=>'Слаг','title'=>'Заголовок формы','description'=>'Описание','submit_label'=>'Текст кнопки','submit_button_class'=>'Класс кнопки отправки','trigger_button_class'=>'Класс кнопки открытия popup','button_class'=>'Класс кнопки (legacy)','success_message'=>'Сообщение после отправки','notification_emails'=>'Отправлять на e-mail','is_active'=>'Активна','store_submissions'=>'Сохранять заявки'];
+    }
+
+    public function getEffectiveSubmitButtonClass(): string
+    {
+        $module = \Yii::$app->getModule('forms');
+        $moduleClass = $module instanceof \larikmc\forms\Module ? $module->getDefaultSubmitButtonClass() : '';
+        $legacy = self::hasButtonClassColumn() ? trim((string) $this->getAttribute('button_class')) : '';
+        $current = self::hasSubmitButtonClassColumn() ? trim((string) $this->getAttribute('submit_button_class')) : '';
+        return trim($current !== '' ? $current : ($legacy !== '' ? $legacy : $moduleClass));
+    }
+
+    public function getEffectiveTriggerButtonClass(): string
+    {
+        $module = \Yii::$app->getModule('forms');
+        $moduleClass = $module instanceof \larikmc\forms\Module ? $module->getDefaultTriggerButtonClass() : '';
+        $legacy = self::hasButtonClassColumn() ? trim((string) $this->getAttribute('button_class')) : '';
+        $current = self::hasTriggerButtonClassColumn() ? trim((string) $this->getAttribute('trigger_button_class')) : '';
+        return trim($current !== '' ? $current : ($legacy !== '' ? $legacy : $moduleClass));
     }
 
     public function getNotificationEmailsList(): array
@@ -116,6 +181,50 @@ class Form extends ActiveRecord
             $result = false;
         }
 
+        return $result;
+    }
+
+    public static function hasButtonClassColumn(): bool
+    {
+        static $result;
+        if ($result !== null) {
+            return $result;
+        }
+
+        try {
+            $result = self::getTableSchema()->getColumn('button_class') !== null;
+        } catch (\Throwable) {
+            $result = false;
+        }
+
+        return $result;
+    }
+
+    public static function hasSubmitButtonClassColumn(): bool
+    {
+        static $result;
+        if ($result !== null) {
+            return $result;
+        }
+        try {
+            $result = self::getTableSchema()->getColumn('submit_button_class') !== null;
+        } catch (\Throwable) {
+            $result = false;
+        }
+        return $result;
+    }
+
+    public static function hasTriggerButtonClassColumn(): bool
+    {
+        static $result;
+        if ($result !== null) {
+            return $result;
+        }
+        try {
+            $result = self::getTableSchema()->getColumn('trigger_button_class') !== null;
+        } catch (\Throwable) {
+            $result = false;
+        }
         return $result;
     }
 

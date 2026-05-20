@@ -16,6 +16,9 @@ class Module extends BaseModule
     public array $submitRoute = ['/forms/submit/index'];
     public ?string $defaultSuccessRedirect = null;
     public array|string|null $notificationEmails = null;
+    public string $defaultSubmitButtonClass = '';
+    public string $defaultTriggerButtonClass = '';
+    public string $defaultConsentTextHtml = 'Даю согласие на обработку персональных данных для обработки моего обращения и обратной связи со мной. Ознакомлен(а) с Политикой обработки персональных данных.';
 
     public function init(): void
     {
@@ -32,6 +35,42 @@ class Module extends BaseModule
         }
 
         return $this->normalizeEmails($stored ?: $this->notificationEmails);
+    }
+
+    public function getDefaultSubmitButtonClass(): string
+    {
+        if (Setting::hasSettingsTable()) {
+            $stored = trim((string) Setting::getValue(Setting::KEY_DEFAULT_SUBMIT_BUTTON_CLASS, ''));
+            if ($stored !== '') {
+                return $stored;
+            }
+        }
+
+        return trim($this->defaultSubmitButtonClass);
+    }
+
+    public function getDefaultTriggerButtonClass(): string
+    {
+        if (Setting::hasSettingsTable()) {
+            $stored = trim((string) Setting::getValue(Setting::KEY_DEFAULT_TRIGGER_BUTTON_CLASS, ''));
+            if ($stored !== '') {
+                return $stored;
+            }
+        }
+
+        return trim($this->defaultTriggerButtonClass);
+    }
+
+    public function getConsentTextHtml(): string
+    {
+        if (Setting::hasSettingsTable()) {
+            $stored = trim((string) Setting::getValue(Setting::KEY_CONSENT_TEXT_HTML, ''));
+            if ($stored !== '') {
+                return $stored;
+            }
+        }
+
+        return $this->defaultConsentTextHtml;
     }
 
     public function normalizeEmails(array|string|null $emails): array

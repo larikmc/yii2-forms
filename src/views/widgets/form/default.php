@@ -1,10 +1,19 @@
 <?php
 use larikmc\forms\helpers\FieldRenderHelper;
 use yii\helpers\Html;
+use yii\helpers\HtmlPurifier;
 /** @var $model \larikmc\forms\models\DynamicFormModel */
 /** @var $form \larikmc\forms\models\Form */
 $successMessage = Yii::$app->session->getFlash('forms_success_' . $form->slug);
 $errorMessages = Yii::$app->session->getFlash('forms_error_' . $form->slug);
+$consentTextHtml = '';
+$module = Yii::$app->getModule('forms');
+if ($module instanceof \larikmc\forms\Module) {
+    $consentTextHtml = HtmlPurifier::process($module->getConsentTextHtml(), [
+        'HTML.Allowed' => 'a[href|target|rel],b,strong,i,em,span,br',
+        'AutoFormat.RemoveEmpty' => true,
+    ]);
+}
 ?>
 <div class="forms-widget" id="forms-<?= Html::encode($uid) ?>">
 <?php if ($widget->showHeading && $form->title): ?><h3><?= Html::encode($form->title) ?></h3><?php endif; ?>
@@ -37,7 +46,7 @@ $errorMessages = Yii::$app->session->getFlash('forms_error_' . $form->slug);
         ]) ?>
         <span class="forms-checkbox-ui" aria-hidden="true"></span>
         <span class="forms-checkbox__text">
-            Даю согласие на обработку персональных данных для обработки моего обращения и обратной связи со мной. Ознакомлен(а) с Политикой обработки персональных данных.
+            <?= $consentTextHtml !== '' ? $consentTextHtml : Html::encode('Даю согласие на обработку персональных данных для обработки моего обращения и обратной связи со мной. Ознакомлен(а) с Политикой обработки персональных данных.') ?>
         </span>
     </label>
     <div class="forms-error" data-forms-error="forms_personal_agreement" id="forms-error-forms_personal_agreement"></div>
@@ -45,7 +54,7 @@ $errorMessages = Yii::$app->session->getFlash('forms_error_' . $form->slug);
 <?= Html::submitButton(
     Html::tag('span', Html::encode($form->submit_label), ['class' => 'forms-widget__submit-text'])
     . Html::tag('span', '', ['class' => 'forms-widget__submit-spinner', 'aria-hidden' => 'true']),
-    ['class' => 'forms-widget__submit', 'type' => 'submit']
+    ['class' => $form->getEffectiveSubmitButtonClass(), 'type' => 'submit']
 ) ?>
 <?= Html::endForm() ?>
 <?php endif; ?>

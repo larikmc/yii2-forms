@@ -7,6 +7,9 @@ use yii\db\ActiveRecord;
 class Setting extends ActiveRecord
 {
     public const KEY_NOTIFICATION_EMAILS = 'notification_emails';
+    public const KEY_DEFAULT_SUBMIT_BUTTON_CLASS = 'default_submit_button_class';
+    public const KEY_DEFAULT_TRIGGER_BUTTON_CLASS = 'default_trigger_button_class';
+    public const KEY_CONSENT_TEXT_HTML = 'consent_text_html';
 
     public static function tableName(): string
     {

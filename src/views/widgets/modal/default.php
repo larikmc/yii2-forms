@@ -1,13 +1,19 @@
 <?php
 use yii\helpers\Html;
+$customButtonClass = $form->getEffectiveTriggerButtonClass();
+$userButtonClass = trim((string)($buttonOptions['class'] ?? ''));
+$buttonClass = trim(($customButtonClass !== '' ? $customButtonClass : '')
+    . ($userButtonClass !== '' ? ' ' . $userButtonClass : ''));
+
 $buttonOptions = array_merge([
-    'class' => 'forms-modal-trigger',
+    'class' => $buttonClass,
     'id' => 'forms-button-' . $uid,
     'type' => 'button',
     'data-forms-modal-open' => '#' . $modalId,
     'aria-controls' => $modalId,
     'aria-haspopup' => 'dialog',
 ], $buttonOptions);
+$buttonOptions['class'] = $buttonClass;
 ?>
 <?= Html::button(Html::encode($buttonLabel), $buttonOptions) ?>
 <div class="forms-modal" id="<?= Html::encode($modalId) ?>" aria-hidden="true" data-forms-modal-slug="<?= Html::encode($form->slug) ?>">

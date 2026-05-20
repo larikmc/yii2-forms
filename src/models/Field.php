@@ -20,6 +20,14 @@ class Field extends ActiveRecord
         if (!parent::beforeValidate()) {
             return false;
         }
+
+        $this->name = $this->normalizeTitleCase($this->name);
+        $this->placeholder = $this->normalizeTrimmed($this->placeholder);
+        $this->hint = $this->normalizeTrimmed($this->hint);
+        $this->mask = $this->normalizeTrimmed($this->mask);
+        $this->options_json = $this->normalizeTrimmed($this->options_json);
+        $this->validation_json = $this->normalizeTrimmed($this->validation_json);
+
         if (!$this->slug && $this->name) {
             $base = Inflector::slug((string)$this->name, '-');
             $base = $base !== '' ? $base : 'field';
@@ -32,5 +40,28 @@ class Field extends ActiveRecord
             $this->slug = $slug;
         }
         return true;
+    }
+
+    private function normalizeTrimmed(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim($value);
+        return $value === '' ? null : $value;
+    }
+
+    private function normalizeTitleCase(?string $value): ?string
+    {
+        $value = $this->normalizeTrimmed($value);
+        if ($value === null) {
+            return null;
+        }
+
+        $first = mb_substr($value, 0, 1);
+        $rest = mb_substr($value, 1);
+
+        return mb_strtoupper($first) . $rest;
     }
 }
