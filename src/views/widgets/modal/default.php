@@ -1,7 +1,7 @@
 <?php
 use yii\helpers\Html;
 $buttonOptions = array_merge([
-    'class' => 'btn btn-primary',
+    'class' => 'forms-modal-trigger',
     'id' => 'forms-button-' . $uid,
     'type' => 'button',
     'data-forms-modal-open' => '#' . $modalId,

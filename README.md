@@ -18,6 +18,9 @@ The extension is designed for projects that use `larikmc/yii2-admin` and need:
 - global reusable fields
 - form-specific field settings
 - own popup implementation without frontend framework dependency
+- own frontend form CSS and JavaScript
+- client-side validation without `jquery` and `yii.activeForm`
+- email notifications with module-level and per-form recipients
 - support for multiple forms and multiple popups on one page
 - file-based PHP templates
 - safe submission storage in JSON
@@ -54,6 +57,7 @@ Example:
         'customTemplatesPath' => '@app/views/forms/templates',
         'submitRoute' => ['/forms/submit/index'],
         'defaultSuccessRedirect' => null,
+        'notificationEmails' => 'sales@example.com, lead@example.com',
     ],
 ],
 ```
@@ -106,6 +110,7 @@ Stores frontend form settings:
 - description
 - submit button text
 - success message
+- form-specific notification emails
 - active status
 
 `slug` is generated automatically.
@@ -153,7 +158,7 @@ Available field types:
 - `radio`
 - `hidden`
 
-For `phone`, the extension uses `yii\widgets\MaskedInput`.
+For `phone`, the extension uses its own frontend mask and validation logic without jQuery or Yii ActiveForm JS.
 
 Default phone mask:
 
@@ -196,6 +201,15 @@ Render form directly on page:
 ]) ?>
 ```
 
+Frontend widget behavior:
+
+- loads its own CSS and JS automatically
+- does not require `bootstrap.css`
+- does not require `jquery.js`
+- does not require `yii.js`
+- does not require `yii.validation.js`
+- does not require `yii.activeForm.js`
+
 With template:
 
 ```php
@@ -224,6 +238,13 @@ Render button and open form in extension popup:
     'buttonLabel' => 'Оставить заявку',
 ]) ?>
 ```
+
+Popup behavior:
+
+- custom modal implementation from the extension
+- no Bootstrap modal JavaScript dependency
+- supports multiple popups on one page
+- success message can be shown directly inside popup after submit
 
 With templates:
 
@@ -380,6 +401,50 @@ What is stored:
 - user-agent
 - created date
 
+## Email Notifications
+
+The extension can send e-mail notifications after form submit.
+
+Global module setting:
+
+```php
+'modules' => [
+    'forms' => [
+        'class' => \larikmc\forms\Module::class,
+        'notificationEmails' => 'sales@example.com, lead@example.com',
+    ],
+],
+```
+
+You can pass:
+
+- one e-mail as string
+- several e-mails separated by comma
+- array of e-mails
+
+Per-form override:
+
+- open form editing in admin
+- fill field `E-mail для уведомлений`
+- if this field is filled, the form will use its own addresses
+- if this field is empty, the form will use module-level addresses
+
+If no notification e-mails are configured, the form is still submitted and stored normally.
+
+## Consent Checkbox
+
+By default, frontend forms include a required consent checkbox before submit:
+
+- user confirms personal data processing consent
+- checkbox is validated on client and server
+- checkbox value is not stored in submission JSON
+
+The default text is:
+
+```text
+Даю согласие на обработку персональных данных для обработки моего обращения и обратной связи со мной. Ознакомлен(а) с Политикой обработки персональных данных.
+```
+
 Statuses:
 
 - `new`
@@ -393,13 +458,17 @@ The extension includes:
 
 - Yii CSRF protection
 - honeypot field
+- required consent checkbox
 - server-side validation
+- client-side validation in extension JavaScript
 - safe JSON decode
 - HTML encoding in admin views
 
 ## Current Notes
 
 - popup frontend is implemented inside the extension and does not depend on Bootstrap modal JS
+- frontend form rendering uses extension CSS and JS instead of Yii ActiveForm assets
+- phone mask and validation are implemented in extension JavaScript
 - default field label is always field name
 - form title is the main user-facing form name
 - submissions are always stored

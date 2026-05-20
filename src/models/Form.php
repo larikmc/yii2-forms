@@ -14,7 +14,7 @@ class Form extends ActiveRecord
 
     public function rules(): array
     {
-        return [
+        $rules = [
             [['title', 'submit_label'], 'required'],
             [['description', 'success_message'], 'string'],
             [['is_active', 'store_submissions'], 'boolean'],
@@ -26,6 +26,14 @@ class Form extends ActiveRecord
             [['slug'], 'required'],
             [['slug'], 'unique'],
         ];
+
+        if (self::hasNotificationEmailsColumn()) {
+            $rules[] = [['notification_emails'], 'string'];
+            $rules[] = [['notification_emails'], 'filter', 'filter' => 'trim'];
+            $rules[] = [['notification_emails'], 'validateNotificationEmails'];
+        }
+
+        return $rules;
     }
 
     public function beforeValidate(): bool
@@ -57,7 +65,58 @@ class Form extends ActiveRecord
 
     public function attributeLabels(): array
     {
-        return ['name'=>'Служебное название','slug'=>'Слаг','title'=>'Заголовок формы','description'=>'Описание','submit_label'=>'Текст кнопки','success_message'=>'Сообщение после отправки','is_active'=>'Активна','store_submissions'=>'Сохранять заявки'];
+        return ['name'=>'Служебное название','slug'=>'Слаг','title'=>'Заголовок формы','description'=>'Описание','submit_label'=>'Текст кнопки','success_message'=>'Сообщение после отправки','notification_emails'=>'E-mail для уведомлений','is_active'=>'Активна','store_submissions'=>'Сохранять заявки'];
+    }
+
+    public function getNotificationEmailsList(): array
+    {
+        $module = \Yii::$app->getModule('forms');
+        if (!$module instanceof \larikmc\forms\Module) {
+            return [];
+        }
+
+        if (self::hasNotificationEmailsColumn() && trim((string) $this->getAttribute('notification_emails')) !== '') {
+            return $module->normalizeEmails($this->getAttribute('notification_emails'));
+        }
+
+        return $module->getNotificationEmails();
+    }
+
+    public function validateNotificationEmails(string $attribute): void
+    {
+        if (!self::hasNotificationEmailsColumn()) {
+            return;
+        }
+
+        $value = (string) $this->$attribute;
+        if (trim($value) === '') {
+            return;
+        }
+
+        $parts = preg_split('/[\s,;]+/', $value, -1, PREG_SPLIT_NO_EMPTY);
+        foreach ($parts as $email) {
+            $email = trim($email);
+            if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $this->addError($attribute, 'Укажите корректные e-mail адреса через запятую.');
+                return;
+            }
+        }
+    }
+
+    public static function hasNotificationEmailsColumn(): bool
+    {
+        static $result;
+        if ($result !== null) {
+            return $result;
+        }
+
+        try {
+            $result = self::getTableSchema()->getColumn('notification_emails') !== null;
+        } catch (\Throwable) {
+            $result = false;
+        }
+
+        return $result;
     }
 
     public function getFormFields() { return $this->hasMany(FormField::class, ['form_id' => 'id'])->orderBy(['sort_order'=>SORT_ASC,'id'=>SORT_ASC]); }

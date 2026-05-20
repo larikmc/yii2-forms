@@ -42,7 +42,6 @@ $statusClass = match ($model->status) {
     </div>
 
     <div class="forms-submission-popup__actions">
-        <?= Html::a('Просмотр страницы', ['view', 'id' => $model->id], ['class' => 'btn btn-outline-secondary', 'target' => '_blank', 'data-pjax' => 0]) ?>
         <?= Html::a('Обработано', ['update-status', 'id' => $model->id, 'status' => Submission::STATUS_PROCESSED], ['class' => 'btn btn-success']) ?>
         <?= Html::a('Спам', ['update-status', 'id' => $model->id, 'status' => Submission::STATUS_SPAM], ['class' => 'btn btn-warning']) ?>
     </div>

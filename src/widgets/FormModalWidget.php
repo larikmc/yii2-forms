@@ -53,8 +53,8 @@ class FormModalWidget extends Widget
 .forms-modal__card{position:relative;width:min(680px,100%);max-height:calc(100vh - 48px);overflow:auto;border:1px solid rgba(83,107,152,.18);border-radius:24px;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(244,247,255,.94));box-shadow:0 28px 60px rgba(15,23,42,.24);}
 .forms-modal__header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 22px 0;}
 .forms-modal__title{margin:0;color:#182033;font-size:28px;font-weight:800;line-height:1.08;letter-spacing:-.04em;}
-.forms-modal__close{position:relative;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:44px;height:44px;padding:0;border:0;border-radius:14px;background:rgba(83,107,152,.08);transition:background .18s ease,transform .18s ease,box-shadow .18s ease;}
-.forms-modal__close:hover{background:rgba(83,107,152,.16);transform:translateY(-1px);box-shadow:0 10px 18px rgba(83,107,152,.14);}
+.forms-modal__close{position:relative;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:44px;height:44px;padding:0;border:0;border-radius:14px;background:rgba(83,107,152,.08);transition:background .18s ease;}
+.forms-modal__close:hover{background:rgba(83,107,152,.16);}
 .forms-modal__close-icon{position:relative;display:block;width:18px;height:18px;}
 .forms-modal__close-icon::before,.forms-modal__close-icon::after{content:"";position:absolute;top:50%;left:50%;width:18px;height:2px;border-radius:999px;background:#4f5f7b;transform-origin:center;}
 .forms-modal__close-icon::before{transform:translate(-50%,-50%) rotate(45deg);}

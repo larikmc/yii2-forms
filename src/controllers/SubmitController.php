@@ -21,9 +21,14 @@ class SubmitController extends Controller
         $formFields = $form->getFormFields()->andWhere(['is_active'=>1])->with('field')->all();
         $model = new DynamicFormModel($formFields);
         $model->load($request->post());
+        $personalAgreement = (bool) $request->post('forms_personal_agreement');
 
-        if (!empty($honeypot) || !$model->validate()) {
-            \Yii::$app->session->setFlash('forms_error_'.$slug, $model->getErrors());
+        if (!empty($honeypot) || !$model->validate() || !$personalAgreement) {
+            $errors = $model->getErrors();
+            if (!$personalAgreement) {
+                $errors['forms_personal_agreement'][] = 'Необходимо дать согласие на обработку персональных данных.';
+            }
+            \Yii::$app->session->setFlash('forms_error_'.$slug, $errors);
             return $this->goBack();
         }
 
@@ -39,8 +44,48 @@ class SubmitController extends Controller
         }
         $submission->save(false);
 
+        $this->sendNotificationEmails($form, $model, $submission);
+
         \Yii::$app->session->setFlash('forms_success_'.$slug, $form->success_message ?: 'Спасибо! Форма отправлена.');
         if (($module = $this->module) && $module->defaultSuccessRedirect) { return $this->redirect($module->defaultSuccessRedirect); }
         return $this->goBack();
+    }
+
+    private function sendNotificationEmails(Form $form, DynamicFormModel $model, Submission $submission): void
+    {
+        $emails = $form->getNotificationEmailsList();
+        if ($emails === [] || !\Yii::$app->has('mailer')) {
+            return;
+        }
+
+        $mailer = \Yii::$app->mailer;
+        $data = $model->getSubmissionData();
+        $rows = [];
+        foreach ($data as $label => $value) {
+            $rows[] = $label . ': ' . (is_scalar($value) ? (string) $value : json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        }
+
+        $subject = 'Новая заявка с формы "' . ($form->title ?: $form->slug) . '"';
+        $body = implode(PHP_EOL, [
+            $subject,
+            '',
+            'Дата: ' . date('d.m.Y H:i:s'),
+            'Страница: ' . ($submission->page_url ?: '-'),
+            'Referrer: ' . ($submission->referrer ?: '-'),
+            'IP: ' . ($submission->ip ?: '-'),
+            '',
+            'Данные формы:',
+            implode(PHP_EOL, $rows),
+        ]);
+
+        try {
+            $mailer->compose()
+                ->setTo($emails)
+                ->setSubject($subject)
+                ->setTextBody($body)
+                ->send();
+        } catch (\Throwable $e) {
+            \Yii::warning($e->getMessage(), 'forms.mail');
+        }
     }
 }

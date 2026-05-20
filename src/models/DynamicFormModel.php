@@ -30,13 +30,33 @@ class DynamicFormModel extends DynamicModel
             $field = $formField->field;
             $slug = $field->slug;
             if ($formField->is_required) { $rules[] = [[$slug], 'required']; }
-            $rules[] = match ($field->type) {
+            $baseRule = match ($field->type) {
                 Field::TYPE_EMAIL => [[$slug], 'email'],
                 Field::TYPE_NUMBER => [[$slug], 'number'],
                 Field::TYPE_CHECKBOX => [[$slug], 'boolean'],
                 Field::TYPE_SELECT, Field::TYPE_RADIO => [[$slug], 'in', 'range' => array_values(array_filter(array_map(fn($o) => $o['value'] ?? null, $field->getOptions())))],
                 default => [[$slug], 'string'],
             };
+            $rules[] = $baseRule;
+
+            if ($field->type === Field::TYPE_PHONE) {
+                $mask = $field->mask ?: '+7 (999) 999-99-99';
+                $rules[] = [[$slug], function (string $attribute) use ($mask) {
+                    $value = (string) $this->$attribute;
+                    $value = trim($value);
+
+                    if ($value === '') {
+                        return;
+                    }
+
+                    $expectedDigits = substr_count($mask, '9') + preg_match_all('/(?<!9)\d/', preg_replace('/9/', '', $mask), $matches);
+                    $actualDigits = preg_match_all('/\d/', $value, $matches);
+
+                    if (str_contains($value, '_') || $actualDigits < $expectedDigits) {
+                        $this->addError($attribute, 'Введите корректный телефон.');
+                    }
+                }];
+            }
         }
         return $rules;
     }

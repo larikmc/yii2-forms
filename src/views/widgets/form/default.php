@@ -1,7 +1,6 @@
 <?php
 use larikmc\forms\helpers\FieldRenderHelper;
-use yii\bootstrap5\ActiveForm;
-use yii\bootstrap5\Html;
+use yii\helpers\Html;
 /** @var $model \larikmc\forms\models\DynamicFormModel */
 /** @var $form \larikmc\forms\models\Form */
 $successMessage = Yii::$app->session->getFlash('forms_success_' . $form->slug);
@@ -18,11 +17,36 @@ $errorMessages = Yii::$app->session->getFlash('forms_error_' . $form->slug);
         <?= Html::encode(implode(' ', array_map(static fn($messages) => implode(' ', (array) $messages), (array) $errorMessages))) ?>
     </div>
 <?php endif; ?>
-<?php $af = ActiveForm::begin(['action'=>['/forms/submit/index'],'options'=>array_merge(['id'=>'forms-form-'.$uid], $widget->formOptions)]); ?>
+<?= Html::beginForm(['/forms/submit/index'], 'post', array_merge([
+    'id' => 'forms-form-' . $uid,
+    'class' => 'forms-widget__form',
+    'novalidate' => true,
+], $widget->formOptions)) ?>
 <?= Html::hiddenInput('_form_slug', $form->slug) ?>
-<div class="forms-widget-hp"><?= Html::textInput('forms_hp','',['autocomplete'=>'off','tabindex'=>-1]) ?></div>
-<?php foreach ($formFields as $formField): ?><?= FieldRenderHelper::render($af, $model, $formField) ?><?php endforeach; ?>
-<?= Html::submitButton(Html::encode($form->submit_label), ['class'=>'btn btn-primary']) ?>
-<?php ActiveForm::end(); ?>
+<div class="forms-widget-hp"><?= Html::textInput('forms_hp', '', ['autocomplete' => 'off', 'tabindex' => -1]) ?></div>
+<?php foreach ($formFields as $formField): ?><?= FieldRenderHelper::render($model, $formField) ?><?php endforeach; ?>
+<div class="forms-field forms-field--checkbox" data-forms-field-wrap="forms_personal_agreement" data-forms-field-type="checkbox" data-forms-required="1">
+    <label class="forms-checkbox-wrap">
+        <?= Html::checkbox('forms_personal_agreement', false, [
+            'class' => 'forms-checkbox',
+            'value' => 1,
+            'data-forms-field' => 'forms_personal_agreement',
+            'data-forms-label' => 'Согласие на обработку персональных данных',
+            'data-forms-type' => 'checkbox',
+            'data-forms-required' => 1,
+        ]) ?>
+        <span class="forms-checkbox-ui" aria-hidden="true"></span>
+        <span class="forms-checkbox__text">
+            Даю согласие на обработку персональных данных для обработки моего обращения и обратной связи со мной. Ознакомлен(а) с Политикой обработки персональных данных.
+        </span>
+    </label>
+    <div class="forms-error" data-forms-error="forms_personal_agreement" id="forms-error-forms_personal_agreement"></div>
+</div>
+<?= Html::submitButton(
+    Html::tag('span', Html::encode($form->submit_label), ['class' => 'forms-widget__submit-text'])
+    . Html::tag('span', '', ['class' => 'forms-widget__submit-spinner', 'aria-hidden' => 'true']),
+    ['class' => 'forms-widget__submit', 'type' => 'submit']
+) ?>
+<?= Html::endForm() ?>
 <?php endif; ?>
 </div>
