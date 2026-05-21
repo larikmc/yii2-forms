@@ -1,5 +1,4 @@
 <?php
-namespace larikmc\forms\migrations;
 
 use yii\db\Migration;
 
