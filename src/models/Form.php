@@ -4,7 +4,6 @@ namespace larikmc\forms\models;
 
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
-use yii\helpers\Inflector;
 
 class Form extends ActiveRecord
 {
@@ -15,16 +14,11 @@ class Form extends ActiveRecord
     public function rules(): array
     {
         $rules = [
-            [['title', 'submit_label'], 'required'],
+            [['name', 'submit_label'], 'required'],
             [['description', 'success_message'], 'string'],
             [['is_active', 'store_submissions'], 'boolean'],
-            [['name', 'slug', 'title', 'submit_label', 'button_class', 'submit_button_class', 'trigger_button_class'], 'string', 'max' => 255],
-            [['name', 'slug', 'title', 'description', 'submit_label', 'success_message', 'button_class', 'submit_button_class', 'trigger_button_class'], 'filter', 'filter' => 'trim'],
-            [['slug'], 'filter', 'filter' => static fn($value) => is_string($value) ? trim(mb_strtolower($value)) : $value],
-            [['slug'], 'default', 'value' => null],
-            [['slug'], 'match', 'pattern' => '/^[a-zA-Z0-9_-]+$/'],
-            [['slug'], 'required'],
-            [['slug'], 'unique'],
+            [['name', 'title', 'submit_label', 'button_class', 'submit_button_class', 'trigger_button_class'], 'string', 'max' => 255],
+            [['name', 'title', 'description', 'submit_label', 'success_message', 'button_class', 'submit_button_class', 'trigger_button_class'], 'filter', 'filter' => 'trim'],
         ];
 
         if (self::hasNotificationEmailsColumn()) {
@@ -66,23 +60,7 @@ class Form extends ActiveRecord
         $this->submit_button_class = $this->normalizeTrimmed($this->submit_button_class);
         $this->trigger_button_class = $this->normalizeTrimmed($this->trigger_button_class);
 
-        if ($this->title) {
-            $this->name = $this->title;
-        }
-
         $this->store_submissions = true;
-
-        if (!$this->slug && $this->name) {
-            $base = Inflector::slug((string)$this->name, '-');
-            $base = $base !== '' ? $base : 'form';
-            $slug = $base;
-            $i = 2;
-            while (self::find()->andWhere(['slug' => $slug])->andFilterWhere(['not', ['id' => $this->id]])->exists()) {
-                $slug = $base . '-' . $i;
-                $i++;
-            }
-            $this->slug = $slug;
-        }
 
         return true;
     }
@@ -112,7 +90,7 @@ class Form extends ActiveRecord
 
     public function attributeLabels(): array
     {
-        return ['name'=>'Служебное название','slug'=>'Слаг','title'=>'Заголовок формы','description'=>'Описание','submit_label'=>'Текст кнопки','submit_button_class'=>'Класс кнопки отправки','trigger_button_class'=>'Класс кнопки открытия popup','button_class'=>'Класс кнопки (legacy)','success_message'=>'Сообщение после отправки','notification_emails'=>'Отправлять на e-mail','is_active'=>'Активна','store_submissions'=>'Сохранять заявки'];
+        return ['name'=>'Название формы (видно только вам)','title'=>'Заголовок формы (на сайте)','description'=>'Описание','submit_label'=>'Текст кнопки','submit_button_class'=>'Класс кнопки отправки','trigger_button_class'=>'Класс кнопки открытия popup','button_class'=>'Класс кнопки (legacy)','success_message'=>'Сообщение после отправки','notification_emails'=>'Отправлять на e-mail','is_active'=>'Активна','store_submissions'=>'Сохранять заявки'];
     }
 
     public function getEffectiveSubmitButtonClass(): string

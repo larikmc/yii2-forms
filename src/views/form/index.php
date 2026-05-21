@@ -8,8 +8,8 @@ use yii\helpers\Html;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'columns' => [
-            ['attribute' => 'title', 'label' => 'Форма', 'value' => static fn($model) => $model->title ?: $model->name],
-            'slug',
+            'id',
+            ['attribute' => 'name', 'label' => 'Форма', 'value' => static fn($model) => $model->name],
             [
                 'attribute' => 'is_active',
                 'format' => 'raw',

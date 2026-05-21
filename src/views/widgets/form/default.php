@@ -4,8 +4,8 @@ use yii\helpers\Html;
 use yii\helpers\HtmlPurifier;
 /** @var $model \larikmc\forms\models\DynamicFormModel */
 /** @var $form \larikmc\forms\models\Form */
-$successMessage = Yii::$app->session->getFlash('forms_success_' . $form->slug);
-$errorMessages = Yii::$app->session->getFlash('forms_error_' . $form->slug);
+$successMessage = Yii::$app->session->getFlash('forms_success_' . $form->id);
+$errorMessages = Yii::$app->session->getFlash('forms_error_' . $form->id);
 $consentTextHtml = '';
 $module = Yii::$app->getModule('forms');
 if ($module instanceof \larikmc\forms\Module) {
@@ -32,7 +32,6 @@ if ($module instanceof \larikmc\forms\Module) {
     'novalidate' => true,
 ], $widget->formOptions)) ?>
 <?= Html::hiddenInput('_form_id', (int) $form->id) ?>
-<?= Html::hiddenInput('_form_slug', $form->slug) ?>
 <div class="forms-widget-hp"><?= Html::textInput('forms_hp', '', ['autocomplete' => 'off', 'tabindex' => -1]) ?></div>
 <?php foreach ($formFields as $formField): ?><?= FieldRenderHelper::render($model, $formField) ?><?php endforeach; ?>
 <div class="forms-field forms-field--checkbox" data-forms-field-wrap="forms_personal_agreement" data-forms-field-type="checkbox" data-forms-required="1">

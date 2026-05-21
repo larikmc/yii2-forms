@@ -9,16 +9,18 @@ class DynamicFormModel extends DynamicModel
     private array $formFields = [];
     private array $labels = [];
     private array $hints = [];
+    private array $fieldAttributeMap = [];
 
     public function __construct(array $formFields, $config = [])
     {
         $this->formFields = $formFields;
         $attributes = [];
         foreach ($formFields as $formField) {
-            $slug = $formField->field->slug;
-            $attributes[$slug] = null;
-            $this->labels[$slug] = $formField->label_override ?: $formField->field->name;
-            $this->hints[$slug] = $formField->getEffectiveHint() ?: '';
+            $attribute = self::attributeNameByFieldId((int) $formField->field_id);
+            $this->fieldAttributeMap[(int) $formField->field_id] = $attribute;
+            $attributes[$attribute] = null;
+            $this->labels[$attribute] = $formField->label_override ?: $formField->field->name;
+            $this->hints[$attribute] = $formField->getEffectiveHint() ?: '';
         }
         parent::__construct($attributes, $config);
     }
@@ -28,20 +30,20 @@ class DynamicFormModel extends DynamicModel
         $rules = [];
         foreach ($this->formFields as $formField) {
             $field = $formField->field;
-            $slug = $field->slug;
-            if ($formField->is_required) { $rules[] = [[$slug], 'required']; }
+            $attribute = $this->attributeByFieldId((int) $formField->field_id);
+            if ($formField->is_required) { $rules[] = [[$attribute], 'required']; }
             $baseRule = match ($field->type) {
-                Field::TYPE_EMAIL => [[$slug], 'email'],
-                Field::TYPE_NUMBER => [[$slug], 'number'],
-                Field::TYPE_CHECKBOX => [[$slug], 'boolean'],
-                Field::TYPE_SELECT, Field::TYPE_RADIO => [[$slug], 'in', 'range' => array_values(array_filter(array_map(fn($o) => $o['value'] ?? null, $field->getOptions())))],
-                default => [[$slug], 'string'],
+                Field::TYPE_EMAIL => [[$attribute], 'email'],
+                Field::TYPE_NUMBER => [[$attribute], 'number'],
+                Field::TYPE_CHECKBOX => [[$attribute], 'boolean'],
+                Field::TYPE_SELECT, Field::TYPE_RADIO => [[$attribute], 'in', 'range' => array_values(array_filter(array_map(fn($o) => $o['value'] ?? null, $field->getOptions())))],
+                default => [[$attribute], 'string'],
             };
             $rules[] = $baseRule;
 
             if ($field->type === Field::TYPE_PHONE) {
                 $mask = $field->mask ?: '+7 (999) 999-99-99';
-                $rules[] = [[$slug], function (string $attribute) use ($mask) {
+                $rules[] = [[$attribute], function (string $attribute) use ($mask) {
                     $value = (string) $this->$attribute;
                     $value = trim($value);
 
@@ -75,4 +77,14 @@ class DynamicFormModel extends DynamicModel
     }
 
     public function getDynamicAttributes(): array { return array_keys($this->getAttributes()); }
+
+    public function attributeByFieldId(int $fieldId): string
+    {
+        return $this->fieldAttributeMap[$fieldId] ?? self::attributeNameByFieldId($fieldId);
+    }
+
+    public static function attributeNameByFieldId(int $fieldId): string
+    {
+        return 'field_' . $fieldId;
+    }
 }

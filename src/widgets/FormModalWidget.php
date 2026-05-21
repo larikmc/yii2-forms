@@ -10,8 +10,7 @@ use yii\web\View;
 
 class FormModalWidget extends Widget
 {
-    public string $slug = '';
-    public ?int $formId = null;
+    public int $formId = 0;
     public string $buttonLabel = 'Оставить заявку';
     public ?string $formTemplate = null;
     public ?string $modalTemplate = null;
@@ -25,23 +24,19 @@ class FormModalWidget extends Widget
     {
         $module = \Yii::$app->getModule('forms');
         if (!$module instanceof Module) { return ''; }
-        $query = Form::find()->where(['is_active' => 1]);
-        if ($this->formId !== null) {
-            $query->andWhere(['id' => $this->formId]);
-        } else {
-            $query->andWhere(['slug' => $this->slug]);
+        if ($this->formId <= 0) {
+            return YII_DEBUG ? '<!-- Form id is required -->' : '';
         }
-        $form = $query->one();
+        $form = Form::find()->where(['is_active' => 1, 'id' => $this->formId])->one();
         if (!$form) {
-            $idOrSlug = $this->formId !== null ? ('id=' . $this->formId) : ('slug=' . $this->slug);
-            return YII_DEBUG ? "<!-- Form ({$idOrSlug}) not found or inactive -->" : '';
+            return YII_DEBUG ? "<!-- Form (id={$this->formId}) not found or inactive -->" : '';
         }
 
         $view = $this->getView();
         FormsModalAsset::register($view);
         $this->registerClientCode($view);
-        $uid = $this->getId() . '-' . $form->slug . '-' . substr(md5(uniqid('', true)), 0, 8);
-        $modalId = 'forms-modal-' . $form->slug . '-' . substr(md5(uniqid('', true)), 0, 8);
+        $uid = $this->getId() . '-form-' . $form->id . '-' . substr(md5(uniqid('', true)), 0, 8);
+        $modalId = 'forms-modal-' . $form->id . '-' . substr(md5(uniqid('', true)), 0, 8);
         $formHtml = FormWidget::widget([
             'formId' => $form->id,
             'template' => $this->formTemplate,

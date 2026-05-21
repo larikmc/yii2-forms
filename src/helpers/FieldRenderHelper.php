@@ -11,7 +11,9 @@ class FieldRenderHelper
     public static function render($model, FormField $formField): string
     {
         $field = $formField->field;
-        $slug = $field->slug;
+        $slug = method_exists($model, 'attributeByFieldId')
+            ? $model->attributeByFieldId((int) $field->id)
+            : ('field_' . $field->id);
         $placeholder = $formField->getEffectivePlaceholder();
         $hint = $formField->getEffectiveHint();
         $label = $formField->label_override ?: $field->name;

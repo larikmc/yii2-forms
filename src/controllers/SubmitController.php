@@ -13,16 +13,9 @@ class SubmitController extends Controller
         $request = \Yii::$app->request;
         if (!$request->isPost) { return $this->goHome(); }
         $formId = (int) $request->post('_form_id', 0);
-        $slug = (string) $request->post('_form_slug', '');
         $honeypot = $request->post('forms_hp');
 
-        $query = Form::find()->where(['is_active' => 1]);
-        if ($formId > 0) {
-            $query->andWhere(['id' => $formId]);
-        } else {
-            $query->andWhere(['slug' => $slug]);
-        }
-        $form = $query->one();
+        $form = Form::find()->where(['is_active' => 1, 'id' => $formId])->one();
         if (!$form) { return $this->goBack(); }
 
         $formFields = $form->getFormFields()->andWhere(['is_active'=>1])->with('field')->all();
@@ -35,7 +28,7 @@ class SubmitController extends Controller
             if (!$personalAgreement) {
                 $errors['forms_personal_agreement'][] = 'Необходимо дать согласие на обработку персональных данных.';
             }
-            \Yii::$app->session->setFlash('forms_error_'.$form->slug, $errors);
+            \Yii::$app->session->setFlash('forms_error_'.$form->id, $errors);
             return $this->goBack();
         }
 
@@ -53,7 +46,7 @@ class SubmitController extends Controller
 
         $this->sendNotificationEmails($form, $model, $submission);
 
-        \Yii::$app->session->setFlash('forms_success_'.$form->slug, $form->success_message ?: 'Спасибо! Форма отправлена.');
+        \Yii::$app->session->setFlash('forms_success_'.$form->id, $form->success_message ?: 'Спасибо! Форма отправлена.');
         if (($module = $this->module) && $module->defaultSuccessRedirect) { return $this->redirect($module->defaultSuccessRedirect); }
         return $this->goBack();
     }
@@ -72,7 +65,7 @@ class SubmitController extends Controller
             $rows[] = $label . ': ' . (is_scalar($value) ? (string) $value : json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         }
 
-        $subject = 'Новая заявка с формы "' . ($form->title ?: $form->slug) . '"';
+        $subject = 'Новая заявка с формы "' . ($form->title ?: ('Форма #' . $form->id)) . '"';
         $body = implode(PHP_EOL, [
             $subject,
             '',
