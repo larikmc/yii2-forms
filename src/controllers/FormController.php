@@ -66,6 +66,5 @@ class FormController extends AdminController
         return $this->redirect(['fields', 'id' => $id]);
     }
     public function actionCode(int $id){ $model=$this->findModel($id); return $this->render('code',compact('model')); }
-    public function actionSubmissions(int $id){ $model=$this->findModel($id); return $this->render('submissions',compact('model')); }
     protected function findModel(int $id): Form { $m=Form::findOne($id); if(!$m){throw new NotFoundHttpException();} return $m; }
 }
