@@ -42,6 +42,7 @@ class FormModalWidget extends Widget
             'template' => $this->formTemplate,
             'view' => $this->formView,
             'formOptions' => $this->formOptions,
+            'ajax' => true,
             'showHeading' => false,
             'showDescription' => true,
         ]);

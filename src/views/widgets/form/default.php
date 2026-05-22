@@ -30,6 +30,7 @@ if ($module instanceof \larikmc\forms\Module) {
     'id' => 'forms-form-' . $uid,
     'class' => 'forms-widget__form',
     'novalidate' => true,
+    'data-forms-ajax' => $widget->ajax ? '1' : null,
 ], $widget->formOptions)) ?>
 <?= Html::hiddenInput('_form_id', (int) $form->id) ?>
 <div class="forms-widget-hp"><?= Html::textInput('forms_hp', '', ['autocomplete' => 'off', 'tabindex' => -1]) ?></div>

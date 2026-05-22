@@ -4,6 +4,7 @@ namespace larikmc\forms\controllers;
 use larikmc\forms\models\DynamicFormModel;
 use larikmc\forms\models\Form;
 use larikmc\forms\models\Submission;
+use yii\web\Response;
 use yii\web\Controller;
 
 class SubmitController extends Controller
@@ -12,11 +13,16 @@ class SubmitController extends Controller
     {
         $request = \Yii::$app->request;
         if (!$request->isPost) { return $this->goHome(); }
+        $isAjax = $request->isAjax;
         $formId = (int) $request->post('_form_id', 0);
         $honeypot = $request->post('forms_hp');
 
         $form = Form::find()->where(['is_active' => 1, 'id' => $formId])->one();
-        if (!$form) { return $this->goBack(); }
+        if (!$form) {
+            return $isAjax
+                ? $this->asJsonError(['_form' => ['Форма не найдена или отключена.']], Response::HTTP_NOT_FOUND)
+                : $this->goBack();
+        }
 
         $formFields = $form->getFormFields()->andWhere(['is_active'=>1])->with('field')->all();
         $model = new DynamicFormModel($formFields);
@@ -27,6 +33,9 @@ class SubmitController extends Controller
             $errors = $model->getErrors();
             if (!$personalAgreement) {
                 $errors['forms_personal_agreement'][] = 'Необходимо дать согласие на обработку персональных данных.';
+            }
+            if ($isAjax) {
+                return $this->asJsonError($errors, Response::HTTP_UNPROCESSABLE_ENTITY);
             }
             \Yii::$app->session->setFlash('forms_error_'.$form->id, $errors);
             return $this->goBack();
@@ -46,9 +55,28 @@ class SubmitController extends Controller
 
         $this->sendNotificationEmails($form, $model, $submission);
 
-        \Yii::$app->session->setFlash('forms_success_'.$form->id, $form->success_message ?: 'Спасибо! Форма отправлена.');
+        $successMessage = $form->success_message ?: 'Спасибо! Форма отправлена.';
+        if ($isAjax) {
+            \Yii::$app->response->format = Response::FORMAT_JSON;
+            return [
+                'success' => true,
+                'message' => $successMessage,
+            ];
+        }
+        \Yii::$app->session->setFlash('forms_success_'.$form->id, $successMessage);
         if (($module = $this->module) && $module->defaultSuccessRedirect) { return $this->redirect($module->defaultSuccessRedirect); }
         return $this->goBack();
+    }
+
+    private function asJsonError(array $errors, int $statusCode = 422): array
+    {
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+        \Yii::$app->response->statusCode = $statusCode;
+
+        return [
+            'success' => false,
+            'errors' => $errors,
+        ];
     }
 
     private function sendNotificationEmails(Form $form, DynamicFormModel $model, Submission $submission): void

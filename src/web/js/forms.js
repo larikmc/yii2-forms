@@ -145,6 +145,65 @@
     }
   };
 
+  const clearSubmitState = (button) => {
+    if (!button) {
+      return;
+    }
+    button.classList.remove('is-loading');
+    button.disabled = false;
+    button.removeAttribute('aria-busy');
+    button.removeAttribute('data-forms-submit');
+  };
+
+  const setAlert = (form, type, message) => {
+    const widget = form.closest('.forms-widget');
+    if (!widget) {
+      return;
+    }
+
+    const existing = widget.querySelector('.forms-widget__alert');
+    if (existing) {
+      existing.remove();
+    }
+
+    const alert = document.createElement('div');
+    alert.className = `forms-widget__alert forms-widget__alert--${type}`;
+    alert.textContent = message;
+    widget.prepend(alert);
+  };
+
+  const clearAllErrors = (form) => {
+    form.querySelectorAll('[data-forms-field-wrap]').forEach((wrap) => {
+      clearFieldError(wrap, wrap.dataset.formsFieldWrap);
+    });
+  };
+
+  const applyServerErrors = (form, errors) => {
+    clearAllErrors(form);
+
+    Object.entries(errors || {}).forEach(([fieldName, messages]) => {
+      const wrap = form.querySelector(`[data-forms-field-wrap="${fieldName}"]`);
+      if (!wrap) {
+        return;
+      }
+      const list = Array.isArray(messages) ? messages : [messages];
+      setFieldError(wrap, fieldName, list.filter(Boolean).join(' '));
+    });
+  };
+
+  const replaceFormWithSuccess = (form, message) => {
+    const widget = form.closest('.forms-widget');
+    if (!widget) {
+      return;
+    }
+
+    widget.innerHTML = '';
+    const alert = document.createElement('div');
+    alert.className = 'forms-widget__alert forms-widget__alert--success';
+    alert.textContent = message || 'Спасибо! Форма отправлена.';
+    widget.appendChild(alert);
+  };
+
   const validateWrap = (wrap) => {
     const fieldName = wrap.dataset.formsFieldWrap;
     const fieldType = wrap.dataset.formsFieldType || 'text';
@@ -218,6 +277,7 @@
 
   const initForm = (form) => {
     const submitButton = form.querySelector('button[type="submit"], input[type="submit"]');
+    const ajaxEnabled = form.dataset.formsAjax === '1';
 
     form.querySelectorAll('input[data-forms-type="phone"]').forEach(initPhoneMask);
 
@@ -226,7 +286,7 @@
       wrap.addEventListener('change', () => validateWrap(wrap));
     });
 
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', async (event) => {
       let valid = true;
       form.querySelectorAll('[data-forms-field-wrap]').forEach((wrap) => {
         if (!validateWrap(wrap)) {
@@ -253,6 +313,41 @@
         submitButton.setAttribute('aria-busy', 'true');
         submitButton.setAttribute('data-forms-submit', '1');
       }
+
+      if (!ajaxEnabled) {
+        return;
+      }
+
+      event.preventDefault();
+      clearAllErrors(form);
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          credentials: 'same-origin',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+          },
+        });
+
+        const payload = await response.json();
+
+        if (!response.ok || !payload.success) {
+          applyServerErrors(form, payload.errors || {});
+          if (!payload.errors || Object.keys(payload.errors).length === 0) {
+            setAlert(form, 'error', 'Не удалось отправить форму. Попробуйте еще раз.');
+          }
+          clearSubmitState(submitButton);
+          return;
+        }
+
+        replaceFormWithSuccess(form, payload.message);
+      } catch (error) {
+        setAlert(form, 'error', 'Не удалось отправить форму. Проверьте соединение и попробуйте еще раз.');
+        clearSubmitState(submitButton);
+      }
     });
   };
 
@@ -274,9 +369,7 @@
 
   window.addEventListener('pageshow', () => {
     document.querySelectorAll('.is-loading[data-forms-submit]').forEach((button) => {
-      button.classList.remove('is-loading');
-      button.disabled = false;
-      button.removeAttribute('aria-busy');
+      clearSubmitState(button);
     });
   });
 })();
