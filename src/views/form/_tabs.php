@@ -5,7 +5,6 @@ $items = [
     'main' => ['label' => 'Основное', 'url' => ['update', 'id' => $model->id]],
     'fields' => ['label' => 'Поля', 'url' => ['fields', 'id' => $model->id]],
     'code' => ['label' => 'Код вставки', 'url' => ['code', 'id' => $model->id]],
-    'submissions' => ['label' => 'Заявки', 'url' => ['submissions', 'id' => $model->id]],
 ];
 ?>
 <div class="sz-page mb-3">

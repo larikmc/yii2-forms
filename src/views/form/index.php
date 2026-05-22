@@ -24,7 +24,7 @@ use yii\helpers\Html;
             ],
             [
                 'class' => ActionColumn::class,
-                'template' => '{update} {fields} {code} {subs} {delete}',
+                'template' => '{update} {fields} {code} {delete}',
                 'contentOptions' => ['class' => 'action-column'],
                 'buttons' => [
                     'update' => static function ($url) {
@@ -46,13 +46,6 @@ use yii\helpers\Html;
                             'class' => 'sz-row-action',
                             'aria-label' => 'Код вставки',
                             'title' => 'Код вставки',
-                        ]);
-                    },
-                    'subs' => static function ($url, $model) {
-                        return Html::a('<span class="material-symbols-rounded">mail</span>', ['submissions', 'id' => $model->id], [
-                            'class' => 'sz-row-action',
-                            'aria-label' => 'Заявки',
-                            'title' => 'Заявки',
                         ]);
                     },
                     'delete' => static function ($url) {
