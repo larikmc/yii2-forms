@@ -11,6 +11,7 @@ $module = Yii::$app->getModule('forms');
 if ($module instanceof \larikmc\forms\Module) {
     $consentTextHtml = HtmlPurifier::process($module->getConsentTextHtml(), [
         'HTML.Allowed' => 'a[href|target|rel],b,strong,i,em,span,br',
+        'Attr.AllowedFrameTargets' => ['_blank'],
         'AutoFormat.RemoveEmpty' => true,
     ]);
 }
