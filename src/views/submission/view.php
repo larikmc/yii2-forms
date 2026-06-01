@@ -19,7 +19,7 @@ $statusClass = match ($model->status) {
     <div class="forms-submission-card__top">
         <div>
             <p class="forms-submission-card__eyebrow">Заявка</p>
-            <h2 class="forms-submission-card__title"><?= Html::encode($model->form?->title ?: $model->form?->name) ?></h2>
+            <h2 class="forms-submission-card__title"><?= Html::encode($model->form?->name ?: $model->form?->title) ?></h2>
         </div>
         <span class="badge <?= Html::encode($statusClass) ?>"><?= Html::encode($statusLabel) ?></span>
     </div>

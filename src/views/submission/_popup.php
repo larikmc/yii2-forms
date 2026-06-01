@@ -15,7 +15,7 @@ $statusClass = match ($model->status) {
     <div class="forms-submission-popup__header">
         <div>
             <p class="forms-submission-popup__eyebrow">Заявка</p>
-            <h3 class="forms-submission-popup__title"><?= Html::encode($model->form?->title ?: $model->form?->name) ?></h3>
+            <h3 class="forms-submission-popup__title"><?= Html::encode($model->form?->name ?: $model->form?->title) ?></h3>
         </div>
         <span class="badge <?= Html::encode($statusClass) ?>"><?= Html::encode($statusLabel) ?></span>
     </div>

@@ -93,7 +93,8 @@ class SubmitController extends Controller
             $rows[] = $label . ': ' . (is_scalar($value) ? (string) $value : json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         }
 
-        $subject = 'Новая заявка с формы "' . ($form->title ?: ('Форма #' . $form->id)) . '"';
+        $formDisplayName = $form->name ?: ($form->title ?: ('Форма #' . $form->id));
+        $subject = 'Новая заявка с формы "' . $formDisplayName . '"';
         $body = implode(PHP_EOL, [
             $subject,
             '',

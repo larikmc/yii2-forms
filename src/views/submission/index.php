@@ -97,7 +97,7 @@ JS, View::POS_END, 'forms-submission-popup-js');
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'columns' => [
-            ['attribute' => 'form_id', 'value' => fn($m) => $m->form?->title ?: $m->form?->name],
+            ['attribute' => 'form_id', 'value' => fn($m) => $m->form?->name ?: $m->form?->title],
             [
                 'attribute' => 'status',
                 'format' => 'raw',
