@@ -115,6 +115,14 @@ JS, View::POS_END, 'forms-submission-popup-js');
             ],
             'created_at:datetime',
             [
+                'label' => 'Источник заявки',
+                'format' => 'text',
+                'value' => static function ($model) {
+                    $context = $model->getContext();
+                    return $context['data']['object_title'] ?? $context['page_title'] ?? $model->page_url ?? '—';
+                },
+            ],
+            [
                 'class' => ActionColumn::class,
                 'template' => '{view} {delete}',
                 'contentOptions' => ['class' => 'action-column'],

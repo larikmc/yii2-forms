@@ -19,6 +19,10 @@ class Module extends BaseModule
     public string $defaultSubmitButtonClass = '';
     public string $defaultTriggerButtonClass = '';
     public string $defaultConsentTextHtml = 'Даю согласие на обработку персональных данных для обработки моего обращения и обратной связи со мной. Ознакомлен(а) с Политикой обработки персональных данных.';
+    /** Optional dedicated HMAC key; defaults to Yii request.cookieValidationKey. */
+    public ?string $contextSigningKey = null;
+    /** Context token validity in seconds (30 days). 0 disables expiration. */
+    public int $contextTtl = 2592000;
 
     public function init(): void
     {

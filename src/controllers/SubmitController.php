@@ -1,6 +1,7 @@
 <?php
 namespace larikmc\forms\controllers;
 
+use larikmc\forms\helpers\SubmissionContextHelper;
 use larikmc\forms\models\DynamicFormModel;
 use larikmc\forms\models\Form;
 use larikmc\forms\models\Submission;
@@ -45,13 +46,25 @@ class SubmitController extends Controller
         $submission->form_id = $form->id;
         $submission->status = Submission::STATUS_NEW;
         $submission->data_json = json_encode($model->getSubmissionData(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        $submission->page_url = $request->referrer;
+        $contextToken = $request->post('_forms_context', '');
+        $context = ($this->module instanceof \larikmc\forms\Module)
+            ? SubmissionContextHelper::verify(is_string($contextToken) ? $contextToken : '', $form->id, $this->module)
+            : [];
+        $submission->context_json = $context ? json_encode($context, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null;
+        $submission->page_url = $context['page_url'] ?? $request->referrer;
         $submission->referrer = $request->headers->get('referer');
         if (($module = $this->module) && $module->storeClientInfo) {
             $submission->ip = $request->userIP;
             $submission->user_agent = $request->userAgent;
         }
-        $submission->save(false);
+        if (!$submission->save(false)) {
+            \Yii::error('Cannot save forms submission.', 'forms.submit');
+            if ($isAjax) {
+                return $this->asJsonError(['_form' => ['Не удалось сохранить заявку. Попробуйте позже.']], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+            \Yii::$app->session->setFlash('forms_error_'.$form->id, ['_form' => ['Не удалось сохранить заявку. Попробуйте позже.']]);
+            return $this->goBack();
+        }
 
         $this->sendNotificationEmails($form, $model, $submission);
 
@@ -92,6 +105,10 @@ class SubmitController extends Controller
         foreach ($data as $label => $value) {
             $rows[] = $label . ': ' . (is_scalar($value) ? (string) $value : json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         }
+        $contextRows = [];
+        foreach (SubmissionContextHelper::displayRows($submission->getContext()) as $label => $value) {
+            $contextRows[] = $label . ': ' . $value;
+        }
 
         $formDisplayName = $form->name ?: ($form->title ?: ('Форма #' . $form->id));
         $subject = 'Новая заявка с формы "' . $formDisplayName . '"';
@@ -105,6 +122,9 @@ class SubmitController extends Controller
             '',
             'Данные формы:',
             implode(PHP_EOL, $rows),
+            '',
+            'Контекст страницы и объекта:',
+            $contextRows ? implode(PHP_EOL, $contextRows) : 'Не указан',
         ]);
 
         try {

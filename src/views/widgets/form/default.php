@@ -34,6 +34,7 @@ if ($module instanceof \larikmc\forms\Module) {
     'data-forms-ajax' => $widget->ajax ? '1' : null,
 ], $widget->formOptions)) ?>
 <?= Html::hiddenInput('_form_id', (int) $form->id) ?>
+<?= Html::hiddenInput('_forms_context', $signedContext ?? '') ?>
 <div class="forms-widget-hp"><?= Html::textInput('forms_hp', '', ['autocomplete' => 'off', 'tabindex' => -1]) ?></div>
 <?php foreach ($formFields as $formField): ?><?= FieldRenderHelper::render($model, $formField) ?><?php endforeach; ?>
 <div class="forms-field forms-field--checkbox" data-forms-field-wrap="forms_personal_agreement" data-forms-field-type="checkbox" data-forms-required="1">

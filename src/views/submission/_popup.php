@@ -1,4 +1,5 @@
 <?php
+use larikmc\forms\helpers\SubmissionContextHelper;
 use larikmc\forms\models\Submission;
 use yii\helpers\Html;
 
@@ -40,6 +41,18 @@ $statusClass = match ($model->status) {
             </tbody>
         </table>
     </div>
+
+    <?php $contextRows = SubmissionContextHelper::displayRows($model->getContext()); ?>
+    <?php if ($contextRows): ?>
+        <div class="forms-submission-popup__section">
+            <h4>Контекст страницы и объекта</h4>
+            <table class="table forms-submission-popup__table"><tbody>
+            <?php foreach ($contextRows as $label => $value): ?>
+                <tr><th><?= Html::encode($label) ?></th><td><?= Html::encode($value) ?></td></tr>
+            <?php endforeach; ?>
+            </tbody></table>
+        </div>
+    <?php endif; ?>
 
     <div class="forms-submission-popup__actions">
         <?= Html::a('Обработано', ['update-status', 'id' => $model->id, 'status' => Submission::STATUS_PROCESSED], ['class' => 'btn btn-success']) ?>

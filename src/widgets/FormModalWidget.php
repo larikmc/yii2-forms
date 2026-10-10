@@ -19,6 +19,8 @@ class FormModalWidget extends Widget
     public array $buttonOptions = [];
     public array $modalOptions = [];
     public array $formOptions = [];
+    public array $context = [];
+    public bool $capturePageContext = true;
 
     public function run(): string
     {
@@ -42,6 +44,8 @@ class FormModalWidget extends Widget
             'template' => $this->formTemplate,
             'view' => $this->formView,
             'formOptions' => $this->formOptions,
+            'context' => $this->context,
+            'capturePageContext' => $this->capturePageContext,
             'ajax' => true,
             'showHeading' => false,
             'showDescription' => true,
