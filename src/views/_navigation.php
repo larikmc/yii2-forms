@@ -20,10 +20,10 @@ $tabs = array_map(
     $items,
 );
 ?>
-<?php if (class_exists(\larikmc\admin\widgets\AdminTabs::class)): ?>
-    <?= \larikmc\admin\widgets\AdminTabs::widget(['items' => $tabs]) ?>
-<?php else: ?>
-    <nav aria-label="Разделы модуля форм">
+<nav class="sz-page" aria-label="Разделы модуля форм">
+    <?php if (class_exists(\larikmc\admin\widgets\AdminTabs::class)): ?>
+        <?= \larikmc\admin\widgets\AdminTabs::widget(['items' => $tabs]) ?>
+    <?php else: ?>
         <ul class="nav nav-tabs mb-3 sz-tabs__nav">
             <?php foreach ($tabs as $tab): ?>
                 <li class="nav-item">
@@ -34,5 +34,5 @@ $tabs = array_map(
                 </li>
             <?php endforeach; ?>
         </ul>
-    </nav>
-<?php endif; ?>
+    <?php endif; ?>
+</nav>
