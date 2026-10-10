@@ -3,24 +3,7 @@
 use larikmc\forms\models\Setting;
 use yii\bootstrap5\ActiveForm;
 use yii\bootstrap5\Html;
-
-$items = [
-    ['label' => 'Формы', 'url' => ['/forms/form/index']],
-    ['label' => 'Поля форм', 'url' => ['/forms/field/index']],
-    ['label' => 'Заявки', 'url' => ['/forms/submission/index']],
-    ['label' => 'Настройки', 'url' => ['/forms/settings/index'], 'active' => true],
-];
 ?>
-
-<div class="sz-page mb-3">
-    <ul class="nav nav-tabs">
-        <?php foreach ($items as $item): ?>
-            <li class="nav-item">
-                <?= Html::a($item['label'], $item['url'], ['class' => 'nav-link' . (!empty($item['active']) ? ' active' : '')]) ?>
-            </li>
-        <?php endforeach; ?>
-    </ul>
-</div>
 
 <div class="sz-panel">
     <?php if (!Setting::hasSettingsTable()): ?>

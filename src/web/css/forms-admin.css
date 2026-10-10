@@ -1,4 +1,8 @@
 .forms-copy-btn{margin-top:8px}
+.forms-admin-navigation{display:flex;align-items:center;gap:8px;margin:0 0 28px;padding:7px;border:1px solid rgba(111,132,177,.19);border-radius:22px;background:linear-gradient(115deg,rgba(255,255,255,.96),rgba(246,248,255,.88));box-shadow:0 12px 28px rgba(24,34,58,.08)}
+.forms-admin-navigation__link{display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:0 20px;border-radius:15px;color:var(--sz-muted,#697793);font-size:17px;font-weight:800;text-decoration:none;transition:background .18s ease,color .18s ease,box-shadow .18s ease}
+.forms-admin-navigation__link:hover{color:var(--sz-text,#182033);background:rgba(81,115,232,.09)}
+.forms-admin-navigation__link.is-active{color:#fff;background:linear-gradient(135deg,#315bea,#3f75f5);box-shadow:0 10px 22px rgba(47,92,234,.3)}
 .forms-code-banner{display:block;width:100%;margin:0 0 34px;padding:4px 6px 0;border:0;background:transparent}
 .forms-code-banner__main{display:block;max-width:none}
 .forms-code-banner__title{margin:0 0 10px;color:var(--sz-text);font-size:clamp(34px,3.4vw,58px);font-weight:800;line-height:1.02;letter-spacing:-.05em}
@@ -26,4 +30,4 @@
 .forms-ui-grid .sz-ui-kit-code code{white-space:pre-wrap;word-break:break-word}
 .forms-ui-grid .sz-ui-kit-actions{margin-top:auto;padding-top:2px}
 @media (max-width: 1024px){.forms-code-banner{margin-bottom:28px;padding-top:2px}.forms-code-banner__title{margin-bottom:8px;font-size:clamp(28px,6vw,42px)}.forms-code-banner__text{font-size:16px;line-height:1.55}.forms-submission-card__info{grid-template-columns:1fr}.forms-ui-grid .sz-ui-kit-section-title,.forms-ui-grid .sz-ui-kit-subtitle{min-height:0}.forms-ui-grid .sz-ui-kit-panel{padding:22px}}
-@media (max-width: 767px){.forms-submission-card__table th,.forms-submission-card__table td{display:block;width:100%}.forms-submission-card__table th{border-bottom:0;padding-bottom:8px}.forms-submission-card__table td{padding-top:0}}
+@media (max-width: 767px){.forms-admin-navigation{gap:4px;overflow-x:auto;margin-bottom:20px;padding:5px;border-radius:17px}.forms-admin-navigation__link{flex:0 0 auto;min-height:46px;padding:0 14px;font-size:14px}.forms-submission-card__table th,.forms-submission-card__table td{display:block;width:100%}.forms-submission-card__table th{border-bottom:0;padding-bottom:8px}.forms-submission-card__table td{padding-top:0}}
