@@ -10,13 +10,29 @@ $items = [
     ['id' => 'submission', 'label' => 'Заявки', 'url' => ['/forms/submission/index']],
     ['id' => 'settings', 'label' => 'Настройки', 'url' => ['/forms/settings/index']],
 ];
+
+$tabs = array_map(
+    static fn (array $item): array => [
+        'label' => $item['label'],
+        'url' => $item['url'],
+        'active' => $item['id'] === $activeController,
+    ],
+    $items,
+);
 ?>
-<nav class="forms-admin-navigation" aria-label="Разделы модуля форм">
-    <?php foreach ($items as $item): ?>
-        <?= Html::a(
-            $item['label'],
-            $item['url'],
-            ['class' => 'forms-admin-navigation__link' . ($item['id'] === $activeController ? ' is-active' : '')],
-        ) ?>
-    <?php endforeach; ?>
-</nav>
+<?php if (class_exists(\larikmc\admin\widgets\AdminTabs::class)): ?>
+    <?= \larikmc\admin\widgets\AdminTabs::widget(['items' => $tabs]) ?>
+<?php else: ?>
+    <nav aria-label="Разделы модуля форм">
+        <ul class="nav nav-tabs mb-3 sz-tabs__nav">
+            <?php foreach ($tabs as $tab): ?>
+                <li class="nav-item">
+                    <?= Html::a($tab['label'], $tab['url'], [
+                        'class' => 'nav-link' . ($tab['active'] ? ' active' : ''),
+                        'aria-current' => $tab['active'] ? 'page' : null,
+                    ]) ?>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </nav>
+<?php endif; ?>
